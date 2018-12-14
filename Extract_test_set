@@ -1,0 +1,45 @@
+import pandas as pd
+import nordlys
+
+
+
+rel = pd.read_csv(r'DBpedia-Entity/collection/v2/qrels-v2.txt', delim_whitespace=True, header=None, names = ['query_ID', 'kan_weg', 'entity', 'relevance'])
+queries = pd.read_csv(r'DBpedia-Entity/collection/v2/queries-v2.txt', sep='\t', header=None, names = ['query_ID', 'query'])
+queries_stopped = pd.read_csv(r'DBpedia-Entity/collection/v2/queries-v2_stopped.txt', sep='\t', header=None, names = ['query_ID', 'query'])
+
+rel = rel.drop(columns = ['kan_weg'])
+
+
+print(queries.head())
+
+# Word in query should be seperated by a '+', so "information+retrieval"
+
+x = 'vietnam war movie'
+
+code = queries[queries['query']==x]
+code = code['query_ID'][0]
+print(code)
+
+def create_url(query,num_docs,method):
+
+
+
+
+
+    webpage = 'http://api.nordlys.cc/er?'
+    query = "q="+query
+    amount = "&1st_num_docs="+str(num_docs)
+    method = '&model='+method
+    return webpage+query+amount+method
+
+url = create_url('jorrit+ik',10,'lm')
+
+print(url)
+
+dcg = []
+ideal = []
+ndcg = []
+for i, rel in enumerate(data):
+    if i == 0:
+        dcg
+        ndcg.append()
