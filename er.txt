@@ -1,0 +1,46 @@
+{
+  "query": "vietnam war movie", 
+  "results": {
+    "0": {
+      "entity": "<dbpedia:The_Odd_Angry_Shot>", 
+      "score": -17.615987323717935
+    }, 
+    "1": {
+      "entity": "<dbpedia:Viet_Rock>", 
+      "score": -17.789891640281162
+    }, 
+    "2": {
+      "entity": "<dbpedia:R-Point>", 
+      "score": -17.939994443880927
+    }, 
+    "3": {
+      "entity": "<dbpedia:Coordinates_of_Death>", 
+      "score": -18.229980502350493
+    }, 
+    "4": {
+      "entity": "<dbpedia:When_Hell_was_in_Session>", 
+      "score": -18.294574849540822
+    }, 
+    "5": {
+      "entity": "<dbpedia:The_Odd_Angry_Shot_(book)>", 
+      "score": -18.399630844100447
+    }, 
+    "6": {
+      "entity": "<dbpedia:Shooter_(1988_film)>", 
+      "score": -18.791448493791886
+    }, 
+    "7": {
+      "entity": "<dbpedia:The_Land_of_Vietnamese>", 
+      "score": -18.982821870988467
+    }, 
+    "8": {
+      "entity": "<dbpedia:A_Soldier's_Sweetheart>", 
+      "score": -19.82390749252513
+    }, 
+    "9": {
+      "entity": "<dbpedia:Eyemo>", 
+      "score": -20.00875137039848
+    }
+  }, 
+  "total_hits": 10
+}
