@@ -20,12 +20,7 @@ code = queries[queries['query']==x]
 code = code['query_ID'][0]
 print(code)
 
-def create_url(query,num_docs,method):
-
-
-
-
-
+def create_url(query,method):
     webpage = 'http://api.nordlys.cc/er?'
     query = "q="+query
     amount = "&1st_num_docs="+str(num_docs)

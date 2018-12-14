@@ -2,7 +2,37 @@ __author__ = 'Wout'
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-nrOfDocs = 10
+import urllib.request
+
+
+nrOfDocs = 50
+query = "house+concrete+wood"
+query_for_code = "house concrete wood"
+
+
+
+def create_url(query,method):
+    webpage = 'http://api.nordlys.cc/er?'
+    query = "q="+query
+    amount = "&1st_num_docs="+str(nrOfDocs)
+    method = '&model='+method
+    url = webpage+query+amount+method
+
+    req = urllib.request.Request(url,
+                                 headers={'User-Agent': "Magic Browser"})
+    webpage = urllib.request.urlopen(req)
+    web_str = webpage.read().decode("utf-8")
+
+    f = open("hallo" + ".txt", "w+")
+    f.write(web_str)
+    f.close()
+
+create_url('house+concrete+wood', 'lm')
+
+
+
+
+
 docList = [i for i in range(4*nrOfDocs+7)]
 #print (docList)
 for i in docList:
@@ -11,12 +41,15 @@ for i in docList:
 
 #print(docList)
 
-data = pd.read_csv('er.txt', delimiter='\n', header = None, skiprows=docList, names=['results'])
+data = pd.read_csv('hallo.txt', delimiter='\n', header = None, skiprows=docList, names=['results'])
 data['results'] = data['results'].str[17:-3]
 #print (data)
 
-q_name = "vietnam war movie"
-q = "INEX_LD-20120111"
+queries = pd.read_csv(r'DBpedia-Entity/collection/v2/queries-v2.txt', sep='\t', header=None, names = ['query_ID', 'query'])
+
+q = queries[queries['query']==query_for_code]
+q = q.iloc[0]['query_ID']
+print(q)
 
 
 qrels = pd.read_csv('qrels-v2.txt', delim_whitespace=True, header = None, skiprows=docList, names=['ID', 'niks', 'naam', 'relevance'])
@@ -26,8 +59,8 @@ optimalQrels = qrels
 optimalQrels = optimalQrels.drop(columns=['ID', 'niks'])
 #optimalQrels = optimalQrels['relevance'].astype(int)
 optimalQrels= optimalQrels.sort_values(['relevance'], ascending=False)
-optimalQrels = optimalQrels.head(10)
-print(optimalQrels.shape)
+optimalQrels = optimalQrels.head(nrOfDocs)
+#print(optimalQrels.shape)
 
 
 qrels = qrels.loc[qrels['naam'].isin(data['results'])]
@@ -59,9 +92,9 @@ for i,rel in enumerate(optimalQrels['relevance']):
 #print(data)
 print(dcg)
 print(odcg)
-for i in range(10):
+for i in range(nrOfDocs):
     ndcg.append(dcg[i]/odcg[i])
 print(ndcg)
-#plt.plot(range(10), ndcg)
-#plt.show()
+plt.plot(range(nrOfDocs), ndcg)
+plt.show()
 
