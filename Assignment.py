@@ -66,28 +66,22 @@ def doStuff(query_for_code):
     # Get all labeled results
     qrels = qrels.loc[qrels['ID'] == q]
 
-    #print("voor", len(qrels))
-    print(qrels)
-
-    if len(qrels['relevance']) >= nrOfDocs:
-        qrels = qrels.head(nrOfDocs)
-    else:
-        for i in range(len(qrels['relevance']),nrOfDocs):
-            qrels.loc[i] = [0,0,0,0]
-
-
-
     optimalQrels = qrels
     optimalQrels = optimalQrels.drop(columns=['ID', 'niks'])
     optimalQrels= optimalQrels.sort_values(['relevance'], ascending=False)
+    if len(optimalQrels['relevance']) >= nrOfDocs:
+        optimalQrels = optimalQrels.head(nrOfDocs)
+
     qrels = qrels.loc[qrels['naam'].isin(data['results'])]
     qrels = qrels.drop(columns=['ID', 'niks'])
 
-
+    data['rel'] = 0
     for i,result in enumerate(data['results']):
-        for j,naam in enumerate( qrels['naam']):
+        for j,naam in enumerate(qrels['naam']):
             if(result == naam):
                 data.at[i, 'rel'] = qrels.iloc[j]['relevance']
+            # else:
+            #     data.at[i,'rel'] = 0
 
 
     data = data.drop(columns=['results'])
@@ -108,32 +102,41 @@ def doStuff(query_for_code):
         else:
             odcg.append(odcg[-1] + rel/np.log(i+1))
 
+    if len(odcg)<nrOfDocs:
+        for i in range(nrOfDocs-len(odcg)):
+            odcg.append(odcg[-1])
+
     for i in range(nrOfDocs):
         ndcg.append(dcg[i]/odcg[i])
+
     return ndcg
+
 
 def test(queryCategory, query_for_code_category, method):
 
     average_ndcg = []
-    for i, name in enumerate(queryCategory['queryNames']):
-        query_for_code = query_for_code_category['queryNames'][i+25]
-        query = queryCategory['queryNames'][i+25]
+    for i, query in enumerate(queryCategory['queryNames']):
+        query_for_code = query_for_code_category['queryNames'][i]
+        #query = queryCategory['queryNames'][i]
         create_url(query, method)
         result = doStuff(query_for_code)
         average_ndcg.append(result)
         print(i)
-    print('mean = ',np.mean(average_ndcg, axis=0))
-    print('standard deviation = ',np.std(average_ndcg, axis=0))
+    #print('mean = ',np.mean(average_ndcg, axis=0))
+    #print('standard deviation = ',np.std(average_ndcg, axis=0))
     return average_ndcg
 
 print('INEX:')
 Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
-print('SemSearch:')
-SemSearch = test(SemSearch_queryList, SemSearch_query_for_code_List, 'lm')
-print('Qald2:')
-QALD = test(QALD2_queryList, QALD2_query_for_code_List, 'lm')
-print('ListSearch:')
-ListSearch = test(ListSearch_queryList, ListSearch_query_for_code_List, 'lm')
+# print('SemSearch:')
+# SemSearch = test(SemSearch_queryList, SemSearch_query_for_code_List, 'lm')
+# print('Qald2:')
+# QALD = test(QALD2_queryList, QALD2_query_for_code_List, 'lm')
+# print('ListSearch:')
+# ListSearch = test(ListSearch_queryList, ListSearch_query_for_code_List, 'lm')
 
+#print(Inex)
 Inex = np.array(Inex)
+
+plt.plot(range(nrOfDocs),Inex.mean())
 
