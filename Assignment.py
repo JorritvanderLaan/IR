@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import urllib.request
 
 
-nrOfDocs = 100
+nrOfDocs = 20
 
 # Splitting the queries in the four categories.
 
@@ -127,7 +127,7 @@ def test(queryCategory, query_for_code_category, method):
     return average_ndcg
 
 print('INEX:')
-Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
+#Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
 # print('SemSearch:')
 # SemSearch = test(SemSearch_queryList, SemSearch_query_for_code_List, 'lm')
 # print('Qald2:')
@@ -136,7 +136,14 @@ Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
 # ListSearch = test(ListSearch_queryList, ListSearch_query_for_code_List, 'lm')
 
 #print(Inex)
+
+
 Inex = np.array(Inex)
+mean = np.mean(Inex,axis=0)
+std = np.std(Inex,axis=0)
 
-plt.plot(range(nrOfDocs),Inex.mean())
+print(mean)
+print(std)
 
+plt.plot(range(nrOfDocs),mean)
+plt.show()
