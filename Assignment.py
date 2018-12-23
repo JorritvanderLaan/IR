@@ -1,11 +1,11 @@
 __author__ = 'Wout'
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import urllib.request
 
 
-nrOfDocs = 20
+nrOfDocs = 100
 
 # Splitting the queries in the four categories.
 
@@ -55,61 +55,58 @@ def doStuff(query_for_code):
     data = pd.read_csv('hallo.txt', delimiter='\n', header = None, skiprows=docList, names=['results'])
     data['results'] = data['results'].str[17:-3]
 
+    if(len(data['results']) == nrOfDocs):
     # Get code corresponding to query
-    queries = pd.read_csv('queries-v2.txt', sep='\t', header=None, names = ['query_ID', 'query'])
+        queries = pd.read_csv('queries-v2.txt', sep='\t', header=None, names = ['query_ID', 'query'])
 
-    q = queries[queries['query']==query_for_code]
-    q = q.iloc[0]['query_ID']
+        q = queries[queries['query']==query_for_code]
+        q = q.iloc[0]['query_ID']
 
-    qrels = pd.read_csv('qrels-v2.txt', delim_whitespace=True, header = None, skiprows=docList, names=['ID', 'niks', 'naam', 'relevance'])
+        qrels = pd.read_csv('qrels-v2.txt', delim_whitespace=True, header = None, skiprows=docList, names=['ID', 'niks', 'naam', 'relevance'])
 
-    # Get all labeled results
-    qrels = qrels.loc[qrels['ID'] == q]
+        # Get all labeled results
+        qrels = qrels.loc[qrels['ID'] == q]
 
-    optimalQrels = qrels
-    optimalQrels = optimalQrels.drop(columns=['ID', 'niks'])
-    optimalQrels= optimalQrels.sort_values(['relevance'], ascending=False)
-    if len(optimalQrels['relevance']) >= nrOfDocs:
-        optimalQrels = optimalQrels.head(nrOfDocs)
+        optimalQrels = qrels
+        optimalQrels = optimalQrels.drop(columns=['ID', 'niks'])
+        optimalQrels= optimalQrels.sort_values(['relevance'], ascending=False)
+        if len(optimalQrels['relevance']) >= nrOfDocs:
+            optimalQrels = optimalQrels.head(nrOfDocs)
 
-    qrels = qrels.loc[qrels['naam'].isin(data['results'])]
-    qrels = qrels.drop(columns=['ID', 'niks'])
+        qrels = qrels.loc[qrels['naam'].isin(data['results'])]
+        qrels = qrels.drop(columns=['ID', 'niks'])
 
-    data['rel'] = 0
-    for i,result in enumerate(data['results']):
-        for j,naam in enumerate(qrels['naam']):
-            if(result == naam):
-                data.at[i, 'rel'] = qrels.iloc[j]['relevance']
-            # else:
-            #     data.at[i,'rel'] = 0
+        data['rel'] = 0
+        for i,result in enumerate(data['results']):
+            for j,naam in enumerate(qrels['naam']):
+                if(result == naam):
+                    data.at[i, 'rel'] = qrels.iloc[j]['relevance']
+        data = data.drop(columns=['results'])
 
+        dcg = []
+        odcg = []
+        ndcg = []
 
-    data = data.drop(columns=['results'])
+        for i,rel in enumerate(data['rel']):
+            if(i==0):
+                dcg.append(rel)
+            else:
+                dcg.append(dcg[-1] + rel/np.log(i+1))
 
-    dcg = []
-    odcg = []
-    ndcg = []
+        for i,rel in enumerate(optimalQrels['relevance']):
+            if(i==0):
+                odcg.append(rel)
+            else:
+                odcg.append(odcg[-1] + rel/np.log(i+1))
 
-    for i,rel in enumerate(data['rel']):
-        if(i==0):
-            dcg.append(rel)
-        else:
-            dcg.append(dcg[-1] + rel/np.log(i+1))
+        if len(odcg)<nrOfDocs:
+            for i in range(nrOfDocs-len(odcg)):
+                odcg.append(odcg[-1])
 
-    for i,rel in enumerate(optimalQrels['relevance']):
-        if(i==0):
-            odcg.append(rel)
-        else:
-            odcg.append(odcg[-1] + rel/np.log(i+1))
+        for i in range(nrOfDocs):
+            ndcg.append(dcg[i]/odcg[i])
 
-    if len(odcg)<nrOfDocs:
-        for i in range(nrOfDocs-len(odcg)):
-            odcg.append(odcg[-1])
-
-    for i in range(nrOfDocs):
-        ndcg.append(dcg[i]/odcg[i])
-
-    return ndcg
+        return ndcg
 
 
 def test(queryCategory, query_for_code_category, method):
@@ -117,33 +114,21 @@ def test(queryCategory, query_for_code_category, method):
     average_ndcg = []
     for i, query in enumerate(queryCategory['queryNames']):
         query_for_code = query_for_code_category['queryNames'][i]
-        #query = queryCategory['queryNames'][i]
         create_url(query, method)
         result = doStuff(query_for_code)
-        average_ndcg.append(result)
+        if(result != None):
+            average_ndcg.append(result)
         print(i)
-    #print('mean = ',np.mean(average_ndcg, axis=0))
-    #print('standard deviation = ',np.std(average_ndcg, axis=0))
     return average_ndcg
 
 print('INEX:')
-#Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
-# print('SemSearch:')
-# SemSearch = test(SemSearch_queryList, SemSearch_query_for_code_List, 'lm')
-# print('Qald2:')
-# QALD = test(QALD2_queryList, QALD2_query_for_code_List, 'lm')
-# print('ListSearch:')
-# ListSearch = test(ListSearch_queryList, ListSearch_query_for_code_List, 'lm')
+Inex = test(INEX_queryList, INEX_query_for_code_List, 'lm')
+print('SemSearch:')
+SemSearch = test(SemSearch_queryList, SemSearch_query_for_code_List, 'lm')
+print('Qald2:')
+QALD = test(QALD2_queryList, QALD2_query_for_code_List, 'lm')
+print('ListSearch:')
+ListSearch = test(ListSearch_queryList, ListSearch_query_for_code_List, 'lm')
 
-#print(Inex)
-
-
-Inex = np.array(Inex)
 mean = np.mean(Inex,axis=0)
 std = np.std(Inex,axis=0)
-
-print(mean)
-print(std)
-
-plt.plot(range(nrOfDocs),mean)
-plt.show()
